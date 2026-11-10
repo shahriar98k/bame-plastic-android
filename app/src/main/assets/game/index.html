@@ -1,0 +1,74 @@
+<!DOCTYPE html><html lang="bn"><head><meta charset="utf-8"><title>বামে প্লাস্টিক</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<link href="fonts.css" rel="stylesheet">
+<style>
+:root{--st:min(env(safe-area-inset-top,0px),44px);--sb:min(env(safe-area-inset-bottom,0px),30px)}
+html,body{margin:0;height:100%;overflow:hidden;background:#cfe0ee;font-family:'Hind Siliguri',system-ui,sans-serif;touch-action:none;user-select:none;-webkit-user-select:none;color:#fff}
+canvas#g{position:fixed;inset:0;width:100%;height:100%;display:block;filter:contrast(1.1) saturate(1.22)}
+#vg{position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,transparent 52%,rgba(0,0,0,.4) 100%)}
+#bN{left:130px;bottom:calc(var(--sb) + 142px);width:52px;height:46px;font-size:18px}
+.p{position:fixed;background:rgba(10,10,12,.62);border-radius:12px;padding:5px 11px;font-size:14px;font-weight:700}
+#rn{top:calc(var(--st) + 8px);left:8px;font-size:15px;max-width:52vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#ln{top:calc(var(--st) + 46px);left:8px;font-size:21px;color:#ffd166;border:1px solid #ffd16688}
+#mm{position:fixed;top:calc(var(--st) + 8px);right:8px;width:150px;height:150px;border-radius:50%;border:3px solid rgba(255,255,255,.75);box-shadow:0 2px 10px #0008}
+#tr{top:calc(var(--st) + 166px);right:8px;font-size:12px;line-height:1.35;text-align:right;font-weight:500}
+#gg{position:fixed;right:8px;bottom:calc(var(--sb) + 168px);width:164px;text-align:center;background:rgba(10,10,12,.66);border-radius:18px;padding:4px 8px 6px}
+#gs{font-size:40px;font-weight:700;line-height:1}#gu{font-size:11px;opacity:.8}#gr{position:absolute;left:10px;top:6px;font-size:22px;font-weight:700;color:#f2b705}
+#gb{height:8px;background:#fff3;border-radius:4px;margin-top:4px;overflow:hidden}#gf{display:block;height:100%;width:0;background:linear-gradient(90deg,#3fcf8e,#f2b705,#e5484d)}
+#fl{font-size:12px;margin-top:3px}
+.b{position:fixed;border:2px solid rgba(255,255,255,.5);background:rgba(20,22,26,.62);color:#fff;font:inherit;font-weight:700;border-radius:16px;font-size:24px;touch-action:none;line-height:1.05;padding:0}
+.b small{font-size:11px;font-weight:500;display:block}
+.b.on{background:rgba(242,183,5,.7)}
+.dp{width:66px;height:66px}
+#bG{right:74px;bottom:calc(var(--sb) + 84px);background:rgba(40,160,110,.6)}
+#bV{right:74px;bottom:calc(var(--sb) + 10px);background:rgba(190,60,80,.55)}
+#bL{right:140px;bottom:calc(var(--sb) + 10px)}
+#bR{right:8px;bottom:calc(var(--sb) + 10px)}
+.sd{width:76px;height:60px;font-size:17px;left:10px}
+#bB{bottom:calc(var(--sb) + 10px);background:rgba(190,60,80,.5)}
+#bP{bottom:calc(var(--sb) + 76px);background:rgba(214,120,20,.6)}
+#bH{left:10px;bottom:calc(var(--sb) + 142px);width:52px;height:46px;font-size:18px}
+#bC{left:70px;bottom:calc(var(--sb) + 142px);width:52px;height:46px;font-size:18px}
+#nt{position:fixed;bottom:2px;left:50%;transform:translateX(-50%);font-size:10px;padding:2px 8px;opacity:.7;white-space:nowrap}
+#ts{position:fixed;left:50%;top:calc(var(--st) + 100px);transform:translateX(-50%);max-width:88vw;text-align:center;background:rgba(10,10,12,.8);border:1px solid #fff4;border-radius:14px;padding:8px 14px;font-weight:700;font-size:16px;opacity:0;transition:opacity .25s;pointer-events:none;z-index:20}
+#st{position:fixed;inset:0;z-index:50;background:linear-gradient(#1b2a3a,#0d1117);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;padding:20px}
+#st h1{margin:0;font-size:40px;color:#f2b705}#st p{margin:0;opacity:.85;font-size:15px}
+#un{font:inherit;font-size:20px;padding:12px 16px;border-radius:12px;border:2px solid #f2b705;background:#fff;color:#111;width:min(320px,80vw);text-align:center;user-select:text;-webkit-user-select:text}
+#go{font:inherit;font-weight:700;font-size:20px;padding:12px 34px;border:0;border-radius:14px;background:#f2b705;color:#111}
+#st a{color:#9cd2ff;font-size:13px}
+#ob{left:64px;top:calc(var(--st) + 88px);font-size:13px;max-width:60vw;white-space:nowrap}
+#bE{left:8px;top:calc(var(--st) + 84px);width:48px;height:42px;font-size:18px}
+#sc{position:fixed;inset:0;z-index:60;background:rgba(10,10,12,.82);display:none;overflow:auto;-webkit-overflow-scrolling:touch}
+#sc .paper{max-width:560px;margin:calc(var(--st) + 10px) auto 20px;background:#f4ecd8;color:#1d1a14;border-radius:6px;padding:14px 16px 18px;box-shadow:0 8px 30px #000a;font-weight:500}
+#sc h2{margin:0 0 2px;font-size:26px;line-height:1.15;border-bottom:3px double #1d1a14;padding-bottom:6px}
+#sc .sub{font-size:12px;opacity:.7;margin-bottom:8px}
+#sc .rk{display:inline-block;background:#b3202a;color:#fff;font-weight:700;padding:3px 10px;margin:6px 0;font-size:15px}
+#sc table{width:100%;border-collapse:collapse;font-size:15px}#sc td{padding:4px 2px;border-bottom:1px dotted #8a7f66}#sc td:last-child{text-align:right;font-weight:700}
+#sc .box{border:2px dashed #7a6f58;margin:10px 0;padding:8px 10px;font-size:14px;background:#efe4c8}
+#sc .tabs{display:flex;gap:6px;margin:10px 0 4px}#sc .tabs button{flex:1;font:inherit;font-weight:700;padding:7px;border:2px solid #1d1a14;background:transparent;color:#1d1a14;border-radius:8px}#sc .tabs button.on{background:#1d1a14;color:#f4ecd8}
+#sc .pl{font-style:italic;font-size:13px;margin:4px 0 6px}
+#sc .me{background:#ffe08a}
+#sc .again{display:block;width:100%;margin-top:12px;font:inherit;font-weight:700;font-size:19px;padding:12px;border:0;border-radius:12px;background:#f2b705;color:#111}
+#st{background:linear-gradient(180deg,rgba(4,8,16,.62) 0%,rgba(4,8,16,0) 26%,rgba(4,8,16,0) 46%,rgba(4,8,16,.9) 78%);justify-content:space-between;align-items:stretch;padding:calc(var(--st) + 14px) 14px calc(var(--sb) + 12px);gap:0}
+#st .top{text-align:center}#st .logo{font-size:46px;font-weight:700;color:#ffd60a;text-shadow:0 3px 0 #b3202a,0 6px 16px #000a;line-height:1.1}#st .tag{font-size:15px;opacity:.9;text-shadow:0 2px 8px #000}
+#st .mid{display:flex;justify-content:center}#banter{background:rgba(255,255,255,.96);color:#1d1a14;border-radius:18px;padding:10px 16px;max-width:88vw;font-weight:700;font-size:16px;text-align:center;position:relative;transition:opacity .3s;margin-top:34vh;box-shadow:0 6px 20px #0008}
+#banter::after{content:'';position:absolute;left:50%;bottom:-10px;margin-left:-10px;border:10px solid transparent;border-top-color:rgba(255,255,255,.96);border-bottom:0}
+#st .bot{display:flex;flex-direction:column;align-items:center;gap:10px}#st .chips{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}#st .chips span{background:rgba(255,255,255,.14);border:1px solid #fff3;border-radius:999px;padding:4px 12px;font-size:13px;font-weight:700}
+#st .keys{font-size:11.5px;opacity:.75;text-align:center}#st .cr{font-size:10.5px;opacity:.6;text-align:center}#st .cr a{color:#9cd2ff}
+.pre .b,.pre #mm,.pre #tr,.pre #gg,.pre #rn,.pre #ln,.pre #bE,.pre #ob,.pre #nt{display:none!important}
+#vs{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}#vs button{font:inherit;font-weight:700;font-size:14px;padding:7px 12px;border-radius:999px;border:2px solid #fff4;background:rgba(255,255,255,.1);color:#fff}#vs button.on{background:#ffd60a;color:#111;border-color:#ffd60a}
+</style></head><body class="pre"><canvas id="g"></canvas><div id="vg"></div><div id="ts"></div><div id="sc"></div>
+<div id="st"><div class="top"><div class="logo">বামে প্লাস্টিক</div><div class="tag">ঢাকার রাস্তায় বাস চালানোর সিমুলেটর</div></div>
+<div class="mid"><div id="banter"></div></div>
+<div class="bot"><div id="vs"></div><div class="chips"><span id="c1"></span><span id="c2"></span><span id="c3"></span></div><input id="un" maxlength="24" placeholder="আপনার নাম লিখুন" autocomplete="off"><button id="go">চালু করুন ▶</button><div class="keys">▲/W গ্যাস · স্পেস ব্রেক · ▼/S ব্রেক-পিছনে · শিফট টান · H হর্ন · C ক্যামেরা · N রাত-দিন</div><div class="cr">ম্যাপ © OpenStreetMap contributors (ODbL) · <a href="https://shahriar98k.github.io">নির্মাতা: Shahriar Kamal</a></div></div></div>
+<div class="p" id="rn">রাস্তা: —</div><div class="p" id="ln"></div><div class="p" id="ob" style="display:none"><span id="oba" style="display:inline-block;color:#6ee7b7">▲</span> <span id="obt"></span></div><canvas id="mm" width="300" height="300"></canvas><div class="p" id="tr"></div>
+<div id="gg"><span id="gr">N</span><div id="gs">০</div><div id="gu">কিমি/ঘ</div><div id="gb"><i id="gf"></i></div><div id="fl"></div></div>
+<button class="b" id="bE">🏁</button><button class="b" id="bN">🌙</button><button class="b" id="bC">📷</button><button class="b" id="bH">📣</button>
+<button class="b dp" id="bG">▲</button><button class="b dp" id="bL">◀</button><button class="b dp" id="bV">▼</button><button class="b dp" id="bR">▶</button>
+<button class="b sd" id="bB">ব্রেক<small>স্পেস</small></button><button class="b sd" id="bP">টান<small>শিফট</small></button>
+<div class="p" id="nt">© OpenStreetMap contributors (ODbL)</div>
+<script src="three.min.js"></script>
+<script src="game1.js"></script><style>#rot{position:fixed;inset:0;z-index:99999;background:#0b0d10;color:#ffd60a;display:none;align-items:center;justify-content:center;text-align:center;font:700 24px/1.6 'Hind Siliguri',sans-serif}#rot b{display:block;font-size:64px}@media (orientation:portrait) and (max-width:900px){#rot{display:flex}}</style>
+<div id="rot"><div><b>📱↻</b>ফোনটা আড়াআড়ি ঘুরিয়ে খেলুন<br><small style="font-size:14px;color:#ccc">Rotate your phone to landscape</small></div></div>
+<script src="game2.js"></script>
+</body></html>
