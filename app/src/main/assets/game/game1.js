@@ -1114,9 +1114,25 @@ function freeMove(w,dt,tx2,tz2,maxSp,stop){const g=w.g,ex=tx2-g.position.x,ez=tz
 if(ed>.25)turnY(g,Math.atan2(ex,ez),dt,w.vs>3?7:11);const fx=Math.sin(g.rotation.y),fz=Math.cos(g.rotation.y);g.position.x+=fx*w.vs*dt;g.position.z+=fz*w.vs*dt;
 w.ph+=dt*(w.vs>.15?(1.4+w.vs*2.15):0);const run=Math.min(1,w.vs/5);g.position.y=w.vs>.3?Math.abs(Math.cos(w.ph))*(.01+.05*run):0;
 V6.animH(g,w.ph,w.vs<.15?0:(w.vs<2.4?1:1+run*1.3));return ed}
+
+/* high-speed hit (bike and bigger): the pedestrian is thrown through the air like a movie crash */
+const LNCH={bike:1,auto:1,cng:1,car:1,bus:1},LNCH_MIN=6;
+function pedLaunch(w,spd,x,z){const sg=Math.sign(S.vf||1),hx=Math.sin(S.h)*sg,hz=-Math.cos(S.h)*sg,k=Math.min(spd,24),sd=(Math.random()-.5)*.5;
+w.g.rotation.order='YXZ';w.g.rotation.z=0;w.hold=0;w.fl=0;w.vs=0;
+w.cr={vx:hx*k*1.3-hz*sd*k*.3,vz:hz*k*1.3+hx*sd*k*.3,vy:Math.min(14,4.5+k*.45),sp:(Math.random()<.5?-1:1)*(2.5+k*.3),rx:(Math.random()<.5?-1:1)*(4+k*.28),a:0,t:0};
+w.g.position.y=.3;fx(x,1.6,z);shake(Math.min(.8,spd/18));crashSnd(Math.min(1,spd/18))}
+function pedFlight(w,dt){const c=w.cr,p=w.g.position;c.t+=dt;c.vy-=24*dt;p.x+=c.vx*dt;p.z+=c.vz*dt;p.y+=c.vy*dt;
+if(p.y<=0){p.y=0;c.vy=c.vy<-4?-c.vy*.28:0;c.vx*=.9;c.vz*=.9;c.sp*=.88;c.rx*=.85}
+if(p.y<.25){const f=Math.pow(.3,dt);c.vx*=f;c.vz*=f}
+w.g.rotation.y+=c.sp*dt;c.sp*=.985;
+if(p.y>.05||c.t<.5){c.a+=c.rx*dt}else{const tg=Math.round((c.a-Math.PI/2)/Math.PI)*Math.PI+Math.PI/2;c.a+=(tg-c.a)*Math.min(1,dt*9)}
+w.g.rotation.x=c.a;
+const dx=p.x-S.x,dz=p.z-S.z,d=Math.hypot(dx,dz);
+if(c.t>4&&(d>30||c.t>10)){w.cr=null;w.g.rotation.set(0,w.g.rotation.y,0);w.g.position.y=0;w.ch=0;w.vs=0;w.fl=0;w.hold=0;if(placeNear(w,150,380))setLat(w)}}
 function walkTick(dt){actTick(dt);pedCd-=dt;if(MOB>0){MOB-=dt;if(MOB<=0)for(const w of WLK)if(w.ch){w.ch=0;w.vs=0;if(placeNear(w,150,380))setLat(w)}}
 let near=0,beaters=0;
 for(const w of WLK){if(!w.placed)continue;
+if(w.cr){pedFlight(w,dt);continue}
 if(w.hold>0){const H=2.6,t=w.hold;w.hold-=dt;let z;if(t>H-.35)z=1.45*(1-(t-(H-.35))/.35);else if(t<.6)z=1.45*(t/.6);else z=1.45;w.g.rotation.z=z;w.g.position.y=-.02+Math.max(0,(1.45-z))*.0;w.vs=0;V6.animH(w.g,w.ph,0);if(w.hold<=0){w.g.rotation.z=0;w.g.position.y=0}continue}
 let x,z;
 if(w.fl>0){w.fl-=dt;const px=w.g.position.x,pz=w.g.position.z,dx=px-S.x,dz=pz-S.z,d=Math.hypot(dx,dz)||1;freeMove(w,dt,px+dx/d*30+Math.sin(w.ph*.3)*6,pz+dz/d*30,5.2,0);x=w.g.position.x;z=w.g.position.z;if(w.fl<=0||d>90){w.fl=0;w.vs=0;if(d>60){if(placeNear(w,150,380))setLat(w)}else{w.fl=1}}if(d>240){w.fl=0;if(placeNear(w,150,380))setLat(w);continue}}
@@ -1131,7 +1147,7 @@ if(w.cross!==null){const dl=w.cross-w.lat,st=1.5*dt,sg=Math.sign(dl);if(Math.abs
 else if(Math.random()<dt*.04&&RD[w.ri][0]>=6){const hw=RD[w.ri][0]/2+.9;w.cross=-Math.sign(w.lat||1)*(hw+Math.random()*.9)}
 x=a[0]-tz*w.lat;z=a[1]+tx*w.lat;w.ph+=dt*6*w.sp;w.g.position.set(x,Math.abs(Math.cos(w.ph))*.02,z);turnY(w.g,Math.atan2(vx,vz),dt,6);V6.animH(w.g,w.ph,1);
 const ddx=x-S.x,ddz=z-S.z;if(ddx*ddx+ddz*ddz>500*500){if(placeNear(w,150,380))setLat(w);continue}}
-if(pedCd<=0&&G.started&&Math.abs(S.vf)>1){const dx=x-S.x,dz=z-S.z,lat=dx*Math.cos(S.h)+dz*Math.sin(S.h),lon=dx*Math.sin(S.h)-dz*Math.cos(S.h);if(Math.abs(lat)<PV.hw+.26&&Math.abs(lon)<PV.ol+.28){w.hold=2.6;w.fl=0;pedCd=w.ch?.45:1.2;if(!w.ch)S.vf*=.6;crime(50000,'🚶 পথচারীকে ধাক্কা! ছিটকে পড়ল','ped');panic(x,z)}}}
+if(pedCd<=0&&G.started&&Math.abs(S.vf)>1){const dx=x-S.x,dz=z-S.z,lat=dx*Math.cos(S.h)+dz*Math.sin(S.h),lon=dx*Math.sin(S.h)-dz*Math.cos(S.h);if(Math.abs(lat)<PV.hw+.26&&Math.abs(lon)<PV.ol+.28){const spd=Math.abs(S.vf);if(LNCH[PKIND]&&spd>=LNCH_MIN){pedLaunch(w,spd,x,z)}else{w.hold=2.6;w.fl=0}pedCd=w.ch?.45:1.2;if(!w.ch)S.vf*=.6;crime(50000,'🚶 পথচারীকে ধাক্কা! ছিটকে পড়ল','ped');panic(x,z)}}}
 if(G.started&&!G.over&&MOB>0&&beaters>=3&&Math.abs(S.vf)<3){bustT+=dt;BEAT.d.style.opacity=Math.min(1,.35+bustT/3);if(!BEAT.l||bustT-BEAT.l>1.1){BEAT.l=bustT;BEAT.t.textContent=BEATL[Math.floor(Math.random()*BEATL.length)]}S.vf*=Math.max(.6,1-dt*1.1);if(bustT>3.6){bustT=0;MOB=0;BEAT.d.style.opacity=0;BEAT.l=0;for(const w of WLK){w.ch=0;w.vs=0;w.g.rotation.x=0}G.over=1;endTrip('জনতা গাড়ি থেকে টেনে নামিয়ে গণধোলাই দিল 🥊')}}else{bustT=Math.max(0,bustT-dt*1.5);if(bustT<=0){BEAT.d.style.opacity=0;BEAT.l=0}}}
 function panic(x,z){let n=0;for(const w of WLK){if(!w.placed||w.ch||w.hold>0||w.fl>0)continue;const d=Math.hypot(w.g.position.x-x,w.g.position.z-z);if(d<28&&Math.random()<.55){w.fl=4+Math.random()*2.5;n++}if(n>=12)break}}
 
@@ -1143,7 +1159,10 @@ const fm=x=>'৳'+bn(Math.round(x).toLocaleString('en-IN'));
 const RANKS=[[0,'নতুন ড্রাইভার · এখনো মোড়ে কেউ চেনে না'],[50000,'মহল্লার ত্রাস'],[200000,'মোড়ের মাস্তান'],[500000,'ট্রাফিক সার্জেন্টের প্রিয় মেহমান'],[1000000,'চ্যাডের খুশির জাতীয় নায়ক']];
 const PL={d:'আজকের সেরা মাস্তান — মোড়ের চা-ওয়ালাও চেনে',w:'সপ্তাহের সেরা — হর্ন দিলে ট্রাফিক পুলিশ নিজেই সরে যায়',m:'মাসের সেরা — মোড়ে ওর নামে ব্যানার ঝোলে'};
 let LBTAB='d',LBREC=null,LBWHY='';
-function endTrip(why){if(!G.started)return;G.started=false;window.ENDED=1;S.vf=0;LBWHY=why;LBREC={n:G.name,l:Math.round(G.loss),f:Math.round(G.earned),t:Date.now()};const lb=lbLoad();lb.push(LBREC);lbSave(lb);LBTAB='d';showScore()}
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let ONL={},ONLB=0;
+function endTrip(why){if(!G.started)return;G.started=false;window.ENDED=1;S.vf=0;LBWHY=why;LBREC={n:G.name,l:Math.round(G.loss),f:Math.round(G.earned),t:Date.now()};const lb=lbLoad();lb.push(LBREC);lbSave(lb);LBTAB='d';ONL={};showScore();
+if(BPNET.enabled){ONLB=1;BPNET.submit(LBREC.n,LBREC.l,LBREC.f).finally(()=>{ONL={};ONLB=0;if(LBREC&&$('sc').style.display==='block')showScore()})}}
 
 const QUO=['🍵 মোড়ের চা-ওয়ালা: "ভাই, গাড়ি নিয়া আমার দোকানে ঢুকবেন না, চা আপনারে আনি দিব।"','👮 ট্রাফিক সার্জেন্ট: "লাইসেন্স দেখান… থাক, আপনার তো ঢাকায় জন্মই হয়েছে, লাগবে না।"','👴 মামা: "আমার জামানায় গাড়ি রাস্তায় চলত, এখন তো রাস্তা গাড়ির ওপর চলে।"','🧑‍🎓 ছাত্র: "স্যার, আজকের ক্লাস মিস — রাস্তায় আপনার গাড়ির শো দেখছিলাম।"','👩 আন্টি: "বাবা, আস্তে চালাও, আমার রিকশা এখনো ভাড়া পায় নাই।"','🧔 রিকশাওয়ালা: "ভাই, আমার চাকা গেছে। আপনার ইনসুরেন্স কি ফেসবুকে?"','🚌 বাসের হেল্পার: "এই মামা, সামনে যাইয়া সাইড দেন… ও, আপনিই তো আটকাইয়া রাখছেন!"','📱 ফেসবুক: "ভাইরাল হইছেন! ক্যাপশন: এই শহরে বাঁচতে হলে গাড়ি না, ভাগ্য লাগে।"'];
 const FBC=['👍 রাশেদ: "ভাই আমিও একদিন ঢাকায় গাড়ি চালাইছিলাম… আর কিছু বলতে পারি না।"','😂 তানিয়া: "এইটা ড্রাইভিং না, মার্শাল আর্ট।"','🔥 সাকিব ভাই: "এই লোকরে ট্রাফিক কমিটির সভাপতি বানান।"','😭 মিজান: "আমার রিকশার দাম কে দিবে রে ভাই?"','🤝 নাজমুল: "সিটি করপোরেশন: আমরা দেখতেছি। (৫ বছর ধরে)"'];
@@ -1190,11 +1209,13 @@ function altHTML(){const L=G.loss||0,pk=a=>a[Math.floor(Math.random()*a.length)]
 function showScore(){const r=LBREC,m=Math.floor(TR.t/60),s=Math.floor(TR.t%60);let rk=RANKS[0][1];for(const x of RANKS)if(r.l>=x[0])rk=x[1];
 const rows=[['⏱ সময়',bn(String(m).padStart(2,'0')+':'+String(s).padStart(2,'0'))],['📏 দূরত্ব',bn((TR.d/1000).toFixed(2))+' কিমি'],['💰 ভাড়া আয়',fm(r.f)],['💥 গাড়ি/বাসে ধাক্কা',bn(G.cr.veh||0)+' বার · '+fm(G.cl.veh||0)],['🛒 পথের দোকান ভাঙা',bn(G.cr.cart||0)+' টি · '+fm(G.cl.cart||0)],['🧱 দেয়ালে ধাক্কা',bn(G.cr.wall||0)+' বার · '+fm(G.cl.wall||0)],['🪧 খুঁটি/গাছে ধাক্কা',bn(G.cr.prop||0)+' বার · '+fm(G.cl.prop||0)],['🚶 পথচারীকে ধাক্কা',bn(G.cr.ped||0)+' বার · '+fm(G.cl.ped||0)],['☕ চা-পানিতে কাটা (পুলিশ + দেশনেতা)',fm(G.cut)]];
 const secs=r.l/60300,kt=r.l/1000000*100;
-const lb=lbLoad().filter(x=>inRange(x.t,LBTAB)).sort((a,b)=>b.l-a.l).slice(0,10);
-let h='<div class="paper"><h2>'+r.n+'-এর ট্রিপ শেষ</h2><div class="sub">'+LBWHY+' · বামে প্লাস্টিক সংবাদ</div><div class="rk">'+rk+'</div>';
+const onl=BPNET.enabled&&!ONLB&&ONL[LBTAB]&&ONL[LBTAB].rows;
+const lb=onl?ONL[LBTAB].rows.map(x=>({n:x.name,l:x.score,t:x.mine?r.t:-1})):lbLoad().filter(x=>inRange(x.t,LBTAB)).sort((a,b)=>b.l-a.l).slice(0,20);
+if(BPNET.enabled&&!ONLB&&(!ONL[LBTAB]||(ONL[LBTAB].done&&!ONL[LBTAB].rows&&Date.now()-ONL[LBTAB].t>15000))){const tab=LBTAB;ONL[tab]={rows:null,t:Date.now()};BPNET.top(tab).then(rows=>{ONL[tab]={rows:rows,t:Date.now(),done:1};if($('sc').style.display==='block'&&LBTAB===tab)showScore()})}
+let h='<div class="paper"><h2>'+esc(r.n)+'-এর ট্রিপ শেষ</h2><div class="sub">'+LBWHY+' · বামে প্লাস্টিক সংবাদ</div><div class="rk">'+rk+'</div>';
 h+='<div style="font-size:30px;font-weight:700;margin:2px 0">চ্যাডের খুশি '+fm(r.l)+'</div><table>'+rows.map(x=>'<tr><td>'+x[0]+'</td><td>'+x[1]+'</td></tr>').join('')+'</table>';
 h+=roastHTML();h+=altHTML();
-h+='<div class="tabs">'+[['d','আজ'],['w','সপ্তাহ'],['m','মাস']].map(x=>'<button data-k="'+x[0]+'" class="'+(LBTAB===x[0]?'on':'')+'">'+x[1]+'</button>').join('')+'</div><div class="pl">'+PL[LBTAB]+'</div><table>'+(lb.length?lb.map((x,i)=>'<tr'+(x.t===r.t?' class="me"':'')+'><td>'+bn(i+1)+'. '+x.n+'</td><td>'+fm(x.l)+'</td></tr>').join(''):'<tr><td>এখনো কেউ নেই</td><td></td></tr>')+'</table><div class="sub" style="margin-top:6px">স্কোরবোর্ড শুধু এই ফোনে সংরক্ষিত। সব খেলোয়াড়ের একসাথে স্কোরবোর্ডের জন্য নিজের সার্ভার লাগবে।</div>';
+h+='<div class="tabs">'+[['d','আজ'],['w','সপ্তাহ'],['m','মাস']].map(x=>'<button data-k="'+x[0]+'" class="'+(LBTAB===x[0]?'on':'')+'">'+x[1]+'</button>').join('')+'</div><div class="pl">'+PL[LBTAB]+'</div><table>'+(lb.length?lb.map((x,i)=>'<tr'+(x.t===r.t?' class="me"':'')+'><td>'+bn(i+1)+'. '+esc(x.n)+'</td><td>'+fm(x.l)+'</td></tr>').join(''):'<tr><td>'+(BPNET.enabled&&(ONLB||(ONL[LBTAB]&&!ONL[LBTAB].done))?'লোড হচ্ছে…':'এখনো কেউ নেই')+'</td><td></td></tr>')+'</table><div class="sub" style="margin-top:6px">'+(onl?'সব খেলোয়াড়ের সেরা ২০ জন (দিন · সপ্তাহ · মাস)':(BPNET.enabled?'অনলাইন স্কোরবোর্ড এখন পাওয়া যাচ্ছে না — আপাতত এই ফোনের স্কোর দেখানো হচ্ছে।':'স্কোরবোর্ড শুধু এই ফোনে সংরক্ষিত।'))+'</div>';
 h+='<button class="again" id="again">আবার খেলুন</button><div class="sub" style="margin-top:8px">ক্ষতির সংখ্যাগুলো ব্যঙ্গ, ফুয়েল ও ভাড়ার হিসাব খেলার জন্য বানানো। সূত্র: শ্বেতপত্র, আইএমইডি।</div></div>';
 const e=$('sc');e.innerHTML=h;e.style.display='block';e.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{LBTAB=b.dataset.k;showScore()});$('again').onclick=()=>location.reload()}
 let idle=0,armed=0;
@@ -1277,11 +1298,12 @@ let ch=chainWays(MW);{const mt=ST.find(s=>s[2]==='মতিঝিল');if(mt&&ch
 const flat=ch.flat(),S2=[];
 if(ch.length>1)for(const s of ST.filter(q=>!/[A-Za-z]/.test(q[2])).sort((a,b)=>a[2].length-b[2].length)){let b=1e9;for(let i=0;i+1<ch.length;i++){const a=ch[i],c=ch[i+1],dx=c[0]-a[0],dz=c[1]-a[1],L=dx*dx+dz*dz||1,u=Math.max(0,Math.min(1,((s[0]-a[0])*dx+(s[1]-a[1])*dz)/L)),d=Math.hypot(s[0]-a[0]-u*dx,s[1]-a[1]-u*dz);if(d<b)b=d}if(b<120&&!S2.some(o=>o[2]===s[2]||Math.hypot(o[0]-s[0],o[1]-s[1])<150))S2.push(s)}
 return{r:R,m:flat.length?[flat]:[],s:S2,t:Date.now()}}
-try{$('un').value=localStorage.getItem('bp_name')||''}catch(e){}
+{const sv=(BPS.get('bp_name')||'').trim();$('un').value=sv;
+if(sv){$('un').style.display='none';const hi=document.createElement('div');hi.id='hi';hi.append('👋 স্বাগতম, ');const bb=document.createElement('b');bb.textContent=sv;hi.append(bb,' ');const cb=document.createElement('button');cb.textContent='নাম বদলান';cb.onclick=()=>{hi.remove();$('un').style.display='';$('un').focus()};hi.append(cb);$('un').parentNode.insertBefore(hi,$('un'))}}
 {const BANTER=['হেল্পার চেঁচাচ্ছে: “সামনে জায়গা আছে, পিছনে আসুন!” (আসলে নাই)','মামা, সিট ২৪টা, যাত্রী ৪০ — হিসাব মেলাবেন কীভাবে?','চা-পানি না দিলে ফাইল নড়ে না, চাকাও না।','আজকের ডিউটি: যাত্রী তুলুন, ক্ষতি কম করুন। (পারলে)','মেট্রোর নিচ দিয়ে চালালে ছায়া ফ্রি — ওপরেরটা সরকারি।','সতর্কতা: রাস্তায় রিকশা আছে, ধৈর্য নাই।','ড্রাইভার সাহেব: “ব্রেক ফেল? আরে ওটা তো ফিচার!”','হর্ন বাজালে জ্যাম সরে না, কিন্তু মনটা হালকা হয়।','ফুয়েল আছে ০.৫ লিটার, গন্তব্য অনেক দূর — ভরসা আল্লাহ আর পাম্প।','গুলিস্তানের জ্যাম: এখানে সময় থামে, ভাড়া থামে না।','সিট বেল্ট? এই বাসে ছাদটাই সবচেয়ে নিরাপদ সিট।','“রাইট” বলার আগেই ড্রাইভার ছেড়ে দেন — আপনিও পারবেন!'];let bi=Math.floor(Math.random()*BANTER.length);
 const sb=()=>{const e=$('banter');if(!e||G.started)return;e.style.opacity=0;setTimeout(()=>{e.textContent=BANTER[bi++%BANTER.length];e.style.opacity=1},300)};$('banter').textContent=BANTER[bi++%BANTER.length];setInterval(sb,4300);
 PVAR=bus===V6.BUSES.B?0:1;
 {const vs=$('vs'),VN2={bus:['ভিক্টর ক্লাসিক (গোলাপি)','শিখর (নীল)'],car:['সেডান','স্পোর্টস কার','এমপিভি'],bike:['বাইক (লাল)','বাইক (নীল)']},refresh=()=>{vs.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.k===PKIND));const vn=(VN2[PKIND]||[PV.n])[PVAR]||PV.n;$('c1').textContent=PV.em+' '+vn+' · '+PV.info};
 for(const k of Object.keys(PCFG)){const b=document.createElement('button');b.dataset.k=k;b.textContent=PCFG[k].em+' '+PCFG[k].n;b.onclick=()=>{setPlayer(k);refresh()};vs.appendChild(b)}refresh()}
 const best=lbLoad().reduce((a,x)=>Math.max(a,x.l),0);$('c2').textContent='📍 শুরু: '+(window.STARTNAME||'—');$('c3').textContent=best?('🏆 সেরা চ্যাডের খুশি ৳'+bn(Math.round(best).toLocaleString('en-IN'))):'🏆 এখনো খেলেননি'}
-$('go').onclick=()=>{const v=$('un').value.trim();if(!v){$('un').style.borderColor='#e5484d';$('un').focus();return}G.name=v;try{localStorage.setItem('bp_name',v)}catch(e){}G.over=0;for(const v of VEH){if(v.placed&&!v.cr&&Math.hypot(v.g.position.x-S.x,v.g.position.z-S.z)<85){if(!placeNear(v,100,330)){v.placed=false;v.g.visible=false}else{v.g.visible=false;v.g.position.set(S.x+9999,0,S.z+9999)}}}for(const w of WLK){if(w.placed&&Math.hypot(w.g.position.x-S.x,w.g.position.z-S.z)<30){if(placeNear(w,45,260))setLat(w)}}G.started=true;document.body.classList.remove('pre');$('st').style.display='none';newObj();setTimeout(()=>toast('📍 আজকের শুরু: '+(window.STARTNAME||''),3.2),3400);au();toast('স্বাগতম, '+v+'! ▲ চাপলে চলবে · ▼ ব্রেক · ↩ পিছনে',3.2)};
+$('go').onclick=()=>{const v=$('un').value.trim();if(!v){$('un').style.borderColor='#e5484d';$('un').focus();return}G.name=v;BPS.set('bp_name',v);G.over=0;for(const v of VEH){if(v.placed&&!v.cr&&Math.hypot(v.g.position.x-S.x,v.g.position.z-S.z)<85){if(!placeNear(v,100,330)){v.placed=false;v.g.visible=false}else{v.g.visible=false;v.g.position.set(S.x+9999,0,S.z+9999)}}}for(const w of WLK){if(w.placed&&Math.hypot(w.g.position.x-S.x,w.g.position.z-S.z)<30){if(placeNear(w,45,260))setLat(w)}}G.started=true;document.body.classList.remove('pre');$('st').style.display='none';newObj();setTimeout(()=>toast('📍 আজকের শুরু: '+(window.STARTNAME||''),3.2),3400);au();toast('স্বাগতম, '+v+'! ▲ চাপলে চলবে · ▼ ব্রেক · ↩ পিছনে',3.2)};

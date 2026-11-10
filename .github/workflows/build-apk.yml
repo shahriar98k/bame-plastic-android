@@ -13,16 +13,35 @@ jobs:
         with: { distribution: temurin, java-version: '17' }
       - uses: gradle/actions/setup-gradle@v4
         with: { gradle-version: '8.9' }
+      - name: Put the newest game files inside the app (offline copy)
+        run: |
+          git clone --depth 1 https://github.com/shahriar98k/bame-plastic-web.git "$RUNNER_TEMP/web" || true
+          if [ -f "$RUNNER_TEMP/web/index.html" ]; then
+            rm -rf "$RUNNER_TEMP/web/.git" "$RUNNER_TEMP/web/supabase" "$RUNNER_TEMP/web/icons" "$RUNNER_TEMP/web/README.md"
+            rm -rf app/src/main/assets/game && mkdir -p app/src/main/assets/game
+            cp -r "$RUNNER_TEMP/web/." app/src/main/assets/game/
+          fi
+      - name: Prepare signing key
+        env:
+          KEYSTORE_B64: ${{ secrets.KEYSTORE_B64 }}
+        run: |
+          if [ -n "$KEYSTORE_B64" ]; then
+            echo "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/bp.jks"
+            echo "KEYSTORE_PATH=$RUNNER_TEMP/bp.jks" >> "$GITHUB_ENV"
+          fi
       - run: echo "sdk.dir=$ANDROID_HOME" > local.properties
-      - run: gradle assembleDebug --no-daemon
-      - uses: actions/upload-artifact@v4
-        with:
-          name: BamePlastic-apk
-          path: app/build/outputs/apk/debug/app-debug.apk
+      - name: Build APK
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+        run: gradle assembleRelease --no-daemon
       - name: Publish APK as a Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          cp app/build/outputs/apk/debug/app-debug.apk BamePlastic.apk
+          cp app/build/outputs/apk/release/app-release.apk BamePlastic.apk
+          cat > update.json <<EOF
+          {"versionCode": ${{ github.run_number }}, "apk": "https://github.com/${{ github.repository }}/releases/download/latest/BamePlastic.apk", "notes": "অ্যাপের নতুন ভার্সন পাওয়া গেছে। আপডেট করুন।"}
+          EOF
+          sed -i 's/^ *//' update.json
           gh release delete latest -y --cleanup-tag || true
-          gh release create latest BamePlastic.apk --title "Latest APK" --notes "Download BamePlastic.apk and install it on your Android phone."
+          gh release create latest BamePlastic.apk update.json --title "Latest APK" --notes "Download BamePlastic.apk and install it on your Android phone."

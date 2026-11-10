@@ -1,6 +1,6 @@
 <!DOCTYPE html><html lang="bn"><head><meta charset="utf-8"><title>বামে প্লাস্টিক</title>
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<link href="fonts.css" rel="stylesheet">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-content">
+<link href="fonts.css" rel="stylesheet"><link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0b0d10"><link rel="icon" href="icons/icon192.png">
 <style>
 :root{--st:min(env(safe-area-inset-top,0px),44px);--sb:min(env(safe-area-inset-bottom,0px),30px)}
 html,body{margin:0;height:100%;overflow:hidden;background:#cfe0ee;font-family:'Hind Siliguri',system-ui,sans-serif;touch-action:none;user-select:none;-webkit-user-select:none;color:#fff}
@@ -57,6 +57,21 @@ canvas#g{position:fixed;inset:0;width:100%;height:100%;display:block;filter:cont
 #st .keys{font-size:11.5px;opacity:.75;text-align:center}#st .cr{font-size:10.5px;opacity:.6;text-align:center}#st .cr a{color:#9cd2ff}
 .pre .b,.pre #mm,.pre #tr,.pre #gg,.pre #rn,.pre #ln,.pre #bE,.pre #ob,.pre #nt{display:none!important}
 #vs{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}#vs button{font:inherit;font-weight:700;font-size:14px;padding:7px 12px;border-radius:999px;border:2px solid #fff4;background:rgba(255,255,255,.1);color:#fff}#vs button.on{background:#ffd60a;color:#111;border-color:#ffd60a}
+</style><style>
+/* start screen: scrolls instead of getting cut off, and shrinks on short (landscape) phone screens */
+#st{overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;touch-action:pan-y;box-sizing:border-box}
+#banter{margin-top:min(34vh,120px)}
+#hi{background:rgba(255,255,255,.14);border:1px solid #fff3;border-radius:999px;padding:6px 8px 6px 14px;font-size:16px;font-weight:500;display:flex;align-items:center;gap:6px}
+#hi button{font:inherit;font-size:12px;font-weight:700;border:0;border-radius:999px;padding:5px 10px;background:#f2b705;color:#111}
+@media (max-height:520px){
+#st{padding:calc(var(--st) + 4px) 12px calc(var(--sb) + 8px)}
+#st .logo{font-size:30px}#st .tag{font-size:12px}
+#banter{margin-top:6px;font-size:13px;padding:6px 12px}
+#st .bot{gap:6px}#st .chips span{font-size:11px;padding:2px 9px}#st .keys,#st .cr{display:none}
+#vs button{padding:4px 9px;font-size:12px}
+#un{padding:8px 12px;font-size:17px}#go{padding:8px 28px;font-size:18px}}
+#upd{position:fixed;left:50%;bottom:calc(var(--sb) + 8px);transform:translateX(-50%);z-index:100000;background:#f2b705;color:#111;border-radius:999px;padding:8px 14px;font-weight:700;font-size:14px;display:none;gap:8px;align-items:center;box-shadow:0 4px 16px #0008}
+#upd button{font:inherit;font-weight:700;border:0;border-radius:999px;padding:5px 12px;background:#111;color:#f2b705}
 </style></head><body class="pre"><canvas id="g"></canvas><div id="vg"></div><div id="ts"></div><div id="sc"></div>
 <div id="st"><div class="top"><div class="logo">বামে প্লাস্টিক</div><div class="tag">ঢাকার রাস্তায় বাস চালানোর সিমুলেটর</div></div>
 <div class="mid"><div id="banter"></div></div>
@@ -68,7 +83,6 @@ canvas#g{position:fixed;inset:0;width:100%;height:100%;display:block;filter:cont
 <button class="b sd" id="bB">ব্রেক<small>স্পেস</small></button><button class="b sd" id="bP">টান<small>শিফট</small></button>
 <div class="p" id="nt">© OpenStreetMap contributors (ODbL)</div>
 <script src="three.min.js"></script>
-<script src="game1.js"></script><style>#rot{position:fixed;inset:0;z-index:99999;background:#0b0d10;color:#ffd60a;display:none;align-items:center;justify-content:center;text-align:center;font:700 24px/1.6 'Hind Siliguri',sans-serif}#rot b{display:block;font-size:64px}@media (orientation:portrait) and (max-width:900px){#rot{display:flex}}</style>
-<div id="rot"><div><b>📱↻</b>ফোনটা আড়াআড়ি ঘুরিয়ে খেলুন<br><small style="font-size:14px;color:#ccc">Rotate your phone to landscape</small></div></div>
-<script src="game2.js"></script>
+<script src="config.js"></script><script src="store.js"></script><script src="online.js"></script>
+<script src="game1.js"></script><script src="ui.js"></script><script src="game2.js"></script><script src="pwa.js"></script>
 </body></html>
