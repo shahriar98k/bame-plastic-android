@@ -79,6 +79,7 @@ public class MainActivity extends Activity {
             }
         });
         setContentView(web);
+        web.clearCache(true); // always fetch the newest game files from the site
         web.loadUrl(GAME_URL);
         checkForAppUpdate();
     }

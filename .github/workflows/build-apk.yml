@@ -1,6 +1,8 @@
 name: Build APK
 on:
   push:
+  schedule:
+    - cron: '*/15 * * * *'
   workflow_dispatch:
 jobs:
   build:
@@ -9,11 +11,21 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
+      - name: Has the web game changed since the last APK?
+        id: chk
+        run: |
+          WEB=$(git ls-remote https://github.com/shahriar98k/bame-plastic-web.git HEAD | cut -f1)
+          echo "web=$WEB" >> "$GITHUB_OUTPUT"
+          LAST=$(curl -sL https://github.com/${{ github.repository }}/releases/download/latest/update.json | grep -o '"web": *"[0-9a-f]*"' | grep -o '[0-9a-f]\{40\}' || true)
+          if [ "${{ github.event_name }}" = "schedule" ] && [ "$WEB" = "$LAST" ]; then echo "skip=true" >> "$GITHUB_OUTPUT"; else echo "skip=false" >> "$GITHUB_OUTPUT"; fi
       - uses: actions/setup-java@v5
+        if: steps.chk.outputs.skip != 'true'
         with: { distribution: temurin, java-version: '17' }
       - uses: gradle/actions/setup-gradle@v4
+        if: steps.chk.outputs.skip != 'true'
         with: { gradle-version: '8.9' }
       - name: Put the newest game files inside the app (offline copy)
+        if: steps.chk.outputs.skip != 'true'
         run: |
           git clone --depth 1 https://github.com/shahriar98k/bame-plastic-web.git "$RUNNER_TEMP/web" || true
           if [ -f "$RUNNER_TEMP/web/index.html" ]; then
@@ -22,6 +34,7 @@ jobs:
             cp -r "$RUNNER_TEMP/web/." app/src/main/assets/game/
           fi
       - name: Prepare signing key
+        if: steps.chk.outputs.skip != 'true'
         env:
           KEYSTORE_B64: ${{ secrets.KEYSTORE_B64 }}
         run: |
@@ -30,17 +43,25 @@ jobs:
             echo "KEYSTORE_PATH=$RUNNER_TEMP/bp.jks" >> "$GITHUB_ENV"
           fi
       - run: echo "sdk.dir=$ANDROID_HOME" > local.properties
+        if: steps.chk.outputs.skip != 'true'
       - name: Build APK
+        if: steps.chk.outputs.skip != 'true'
         env:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
         run: gradle assembleRelease --no-daemon
       - name: Publish APK as a Release
+        if: steps.chk.outputs.skip != 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cp app/build/outputs/apk/release/app-release.apk BamePlastic.apk
+          VC=${{ github.run_number }}
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            OLD=$(curl -sL https://github.com/${{ github.repository }}/releases/download/latest/update.json | grep -o '"versionCode": *[0-9]*' | grep -o '[0-9]*$' || true)
+            [ -n "$OLD" ] && VC=$OLD
+          fi
           cat > update.json <<EOF
-          {"versionCode": ${{ github.run_number }}, "apk": "https://github.com/${{ github.repository }}/releases/download/latest/BamePlastic.apk", "notes": "অ্যাপের নতুন ভার্সন পাওয়া গেছে। আপডেট করুন।"}
+          {"versionCode": $VC, "web": "${{ steps.chk.outputs.web }}", "apk": "https://github.com/${{ github.repository }}/releases/download/latest/BamePlastic.apk", "notes": "অ্যাপের নতুন ভার্সন পাওয়া গেছে। আপডেট করুন।"}
           EOF
           sed -i 's/^ *//' update.json
           gh release delete latest -y --cleanup-tag || true
